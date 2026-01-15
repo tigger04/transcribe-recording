@@ -181,11 +181,11 @@ pyannote-audio requires Python. Options:
 ## Resolved Decisions
 
 1. **Whisper models:** Download on first run. Tool checks for model, downloads if missing.
-2. **HuggingFace token:** Diarisation is optional. Skip with warning if no token configured.
+2. **HuggingFace token:** Diarisation is optional. Signpost user where to get token. Skip with warning if no token configured.
 3. **Binary name:** `transcribe-summarize`
 
 ## Risk Considerations
 
 - pyannote-audio setup can be finicky (Python venv, CUDA/MPS)
 - Whisper model download requires ~150MB+ network transfer
-- Claude API costs scale with transcript length
+- Claude and OpenAI API costs scale with transcript length - warn user for longer transcripts, suggest local mistral model as free alternative
