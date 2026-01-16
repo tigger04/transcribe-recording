@@ -2,7 +2,7 @@
 # ABOUTME: Builds from source. Python venv for diarization created on first use.
 
 class TranscribeSummarize < Formula
-  desc "Transcribe audio files and generate meeting summaries"
+  desc "Transcribe audio, summarize via Ollama/Claude/OpenAI, identify speakers"
   homepage "https://github.com/tigger04/transcribe-recording"
   url "https://github.com/tigger04/transcribe-recording/archive/refs/tags/v0.1.0.tar.gz"
   sha256 "1143d75596208fbe26e8c11da949080b6fcef3155e9bf839348c520025b60f2e"
