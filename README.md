@@ -2,6 +2,8 @@
 
 Transcribe audio files and generate structured meeting summaries with speaker identification.
 
+**macOS only** — requires Apple Silicon or Intel Mac. Written in Swift using whisper.cpp for fast native transcription.
+
 ## Quickstart
 
 ```bash
@@ -95,32 +97,6 @@ make install
 ```
 
 The Python environment for speaker diarization is created automatically on first use.
-
-## Linux Installation
-
-### Dependencies
-
-```bash
-# Ubuntu/Debian
-sudo apt install ffmpeg python3 python3-pip swift
-
-# Install whisper.cpp from source
-git clone https://github.com/ggerganov/whisper.cpp
-cd whisper.cpp && make && sudo cp main /usr/local/bin/whisper-cpp
-
-# Install Ollama
-curl -fsSL https://ollama.com/install.sh | sh
-ollama pull llama3.1:8b
-```
-
-### Build from Source
-
-```bash
-git clone https://github.com/tigger04/transcribe-recording.git
-cd transcribe-recording
-swift build -c release
-sudo cp .build/release/transcribe-summarize /usr/local/bin/
-```
 
 ## Usage
 

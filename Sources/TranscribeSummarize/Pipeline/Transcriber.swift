@@ -96,6 +96,24 @@ struct Transcriber {
         return modelPath
     }
 
+    // Thread-safe buffer for capturing stderr while streaming progress
+    private final class StderrBuffer: @unchecked Sendable {
+        private var data = Data()
+        private let lock = NSLock()
+
+        func append(_ newData: Data) {
+            lock.lock()
+            defer { lock.unlock() }
+            data.append(newData)
+        }
+
+        func getData() -> Data {
+            lock.lock()
+            defer { lock.unlock() }
+            return data
+        }
+    }
+
     private func runWhisper(wavPath: String, modelPath: String) async throws -> [Segment] {
         let tempDir = FileManager.default.temporaryDirectory
         let outputBase = tempDir.appendingPathComponent(UUID().uuidString).path
@@ -120,12 +138,39 @@ struct Transcriber {
         process.standardError = stderrPipe
         process.standardOutput = verbose > 1 ? nil : FileHandle.nullDevice
 
+        // Thread-safe buffer for capturing stderr
+        let stderrBuffer = StderrBuffer()
+        let verboseLevel = self.verbose
+
+        // Stream stderr in real-time to show progress
+        stderrPipe.fileHandleForReading.readabilityHandler = { handle in
+            let data = handle.availableData
+            if !data.isEmpty {
+                stderrBuffer.append(data)
+                if let output = String(data: data, encoding: .utf8) {
+                    for line in output.components(separatedBy: "\n") {
+                        let trimmed = line.trimmingCharacters(in: .whitespaces)
+                        if trimmed.contains("progress =") {
+                            // Overwrite line with \r for clean progress display
+                            print("\r  \(trimmed)", terminator: "")
+                            fflush(stdout)
+                        } else if verboseLevel > 1 && !trimmed.isEmpty {
+                            print(trimmed)
+                        }
+                    }
+                }
+            }
+        }
+
         try process.run()
         process.waitUntilExit()
 
+        // Clean up handler and print newline after progress
+        stderrPipe.fileHandleForReading.readabilityHandler = nil
+        print() // newline after progress line
+
         guard process.terminationStatus == 0 else {
-            let stderrData = stderrPipe.fileHandleForReading.readDataToEndOfFile()
-            let stderr = String(data: stderrData, encoding: .utf8) ?? "Unknown error"
+            let stderr = String(data: stderrBuffer.getData(), encoding: .utf8) ?? "Unknown error"
             throw TranscribeError.transcriptionFailed(stderr)
         }
 
