@@ -3,14 +3,20 @@
 # ABOUTME: Outputs JSON with speaker segments for Swift to consume.
 
 """
-Speaker diarization with automatic backend selection.
+Speaker diarization with automatic backend selection and GPU acceleration.
 
-Usage: python3 diarize.py <audio_file> [--backend auto|pyannote|speechbrain]
+Usage: python3 diarize.py <audio_file> [--backend auto|pyannote|speechbrain] [--device auto|cpu|mps|cuda]
 
 Backends:
   pyannote    - Best quality (~10-15% DER), requires HuggingFace token
   speechbrain - Good quality (~15-20% DER), no token required (Apache 2.0)
   auto        - Use pyannote if HF_TOKEN set, otherwise speechbrain (default)
+
+Devices:
+  auto        - Use MPS on Apple Silicon, CUDA if available, otherwise CPU (default)
+  cpu         - Force CPU (useful for debugging or if GPU has issues)
+  mps         - Force Metal Performance Shaders (Apple Silicon)
+  cuda        - Force CUDA (NVIDIA GPUs)
 
 Output: JSON to stdout with speaker segments:
 [
@@ -73,8 +79,44 @@ def _patched_snapshot(*args, **kwargs):
 huggingface_hub.snapshot_download = _patched_snapshot
 
 
-def diarize_pyannote(audio_file, token):
-    """Diarize using pyannote-audio (requires HuggingFace token)."""
+def get_device(requested_device="auto"):
+    """Determine the best available device for PyTorch operations.
+
+    Args:
+        requested_device: One of "auto", "cpu", "mps", "cuda"
+
+    Returns:
+        torch.device for the selected device
+    """
+    import torch
+
+    if requested_device == "cpu":
+        return torch.device("cpu")
+    elif requested_device == "mps":
+        if torch.backends.mps.is_available():
+            return torch.device("mps")
+        raise RuntimeError("MPS requested but not available on this system")
+    elif requested_device == "cuda":
+        if torch.cuda.is_available():
+            return torch.device("cuda")
+        raise RuntimeError("CUDA requested but not available on this system")
+    else:
+        # Auto-detect: prefer MPS on Apple Silicon, then CUDA, then CPU
+        if torch.backends.mps.is_available():
+            return torch.device("mps")
+        elif torch.cuda.is_available():
+            return torch.device("cuda")
+        return torch.device("cpu")
+
+
+def diarize_pyannote(audio_file, token, device):
+    """Diarize using pyannote-audio (requires HuggingFace token).
+
+    Args:
+        audio_file: Path to the audio file
+        token: HuggingFace token for model access
+        device: torch.device to run inference on
+    """
     try:
         from pyannote.audio import Pipeline
     except ImportError:
@@ -84,6 +126,9 @@ def diarize_pyannote(audio_file, token):
         "pyannote/speaker-diarization-3.1",
         token=token
     )
+
+    # Move pipeline to specified device for GPU acceleration
+    pipeline.to(device)
 
     result = pipeline(audio_file)
 
@@ -105,10 +150,15 @@ def diarize_pyannote(audio_file, token):
     return segments
 
 
-def diarize_speechbrain(audio_file, num_speakers=None):
+def diarize_speechbrain(audio_file, device, num_speakers=None):
     """Diarize using speechbrain (no token required, Apache 2.0 license).
 
     Uses ECAPA-TDNN embeddings + spectral clustering for speaker identification.
+
+    Args:
+        audio_file: Path to the audio file
+        device: torch.device to run inference on
+        num_speakers: Optional number of speakers (auto-detected if not specified)
     """
     import torch
     import numpy as np
@@ -132,6 +182,9 @@ def diarize_speechbrain(audio_file, num_speakers=None):
     checkpoint = torch.load(embedding_path, map_location='cpu', weights_only=False)
     model.load_state_dict(checkpoint)
     model.eval()
+
+    # Move model to specified device for GPU acceleration
+    model.to(device)
 
     # Feature extractor (mel filterbanks)
     compute_features = Fbank(n_mels=80)
@@ -167,11 +220,13 @@ def diarize_speechbrain(audio_file, num_speakers=None):
 
         # Get embedding: audio -> mel features -> ECAPA-TDNN -> embedding
         with torch.no_grad():
-            # Compute mel filterbank features
-            feats = compute_features(segment)
+            # Move segment to device and compute mel filterbank features
+            segment_device = segment.to(device)
+            feats = compute_features(segment_device)
             # Run through ECAPA-TDNN model
             embedding = model(feats)
-            embeddings.append(embedding.squeeze().numpy())
+            # Move back to CPU for numpy/sklearn operations
+            embeddings.append(embedding.squeeze().cpu().numpy())
 
         start_time = start_sample / sample_rate
         end_time = end_sample / sample_rate
@@ -298,6 +353,12 @@ def main():
         help="Diarization backend (default: auto)"
     )
     parser.add_argument(
+        "--device",
+        choices=["auto", "cpu", "mps", "cuda"],
+        default="auto",
+        help="Compute device: auto, cpu, mps (Apple Silicon), cuda (default: auto)"
+    )
+    parser.add_argument(
         "--token",
         help="HuggingFace token for pyannote (or set HF_TOKEN env var)"
     )
@@ -319,6 +380,13 @@ def main():
     if backend == "auto":
         backend = "pyannote" if token else "speechbrain"
 
+    # Get the compute device
+    try:
+        device = get_device(args.device)
+    except RuntimeError as e:
+        print(json.dumps({"error": str(e)}))
+        sys.exit(1)
+
     try:
         if backend == "pyannote":
             if not token:
@@ -327,9 +395,9 @@ def main():
                     "help": "Set HF_TOKEN env var or use --backend speechbrain"
                 }))
                 sys.exit(1)
-            segments = diarize_pyannote(args.audio_file, token)
+            segments = diarize_pyannote(args.audio_file, token, device)
         else:
-            segments = diarize_speechbrain(args.audio_file, args.num_speakers)
+            segments = diarize_speechbrain(args.audio_file, device, args.num_speakers)
 
         # Check for error dict
         if isinstance(segments, dict) and "error" in segments:

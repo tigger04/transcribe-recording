@@ -55,6 +55,9 @@ struct TranscribeSummarize: AsyncParsableCommand {
     @Option(name: .long, help: "Audio preprocessing: auto, none, analyze (default: auto)")
     var preprocess: String = "auto"
 
+    @Option(name: .long, help: "Compute device for diarization: auto, cpu, mps, cuda (default: auto)")
+    var device: String = "auto"
+
     @Flag(name: [.short, .long], help: "Increase logging verbosity")
     var verbose: Int
 
@@ -71,6 +74,7 @@ struct TranscribeSummarize: AsyncParsableCommand {
             model: model ?? "",
             llm: llm,
             preprocess: preprocess,
+            device: device,
             verbose: verbose,
             dryRun: dryRun
         )
@@ -104,6 +108,7 @@ struct TranscribeSummarize: AsyncParsableCommand {
             print("  LLM provider: \(config.llm)")
         }
         print("  Preprocess: \(config.preprocess.rawValue)")
+        print("  Diarization device: \(config.device.rawValue)")
         print("  Confidence threshold: \(Int(config.confidence * 100))%")
         print("  Timestamps: \(config.timestamps)")
         print()
@@ -176,7 +181,7 @@ struct TranscribeSummarize: AsyncParsableCommand {
 
         // Step 3: Diarise (optional)
         if config.verbose > 0 { print("Identifying speakers...") }
-        let diarizer = Diarizer(verbose: config.verbose, speakerNames: config.speakers)
+        let diarizer = Diarizer(verbose: config.verbose, speakerNames: config.speakers, device: config.device.rawValue)
         segments = try await diarizer.diarize(wavPath: wavPath, segments: segments)
 
         // Step 4: Summarise

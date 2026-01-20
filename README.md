@@ -7,7 +7,7 @@ Turn meeting recordings into structured documents with transcripts, speaker labe
 - A full transcript with timestamps
 - Speaker attribution (identifying who said what)
 
-**How it works:** Everything runs locally on your Mac - your audio never leaves your computer.* The tool uses AI to transcribe speech (via whisper.cpp), identify different speakers (via speechbrain), and summarize the conversation (via Ollama).
+**How it works:** Everything runs locally on your Mac - your audio never leaves your computer.* The tool uses AI to transcribe speech (via whisper.cpp), identify different speakers (via speechbrain with Metal GPU acceleration on Apple Silicon), and summarize the conversation (via Ollama).
 
 **No accounts needed:** Works out of the box without any API keys or signups. Just install and run.
 
@@ -112,7 +112,7 @@ export OLLAMA_MODEL="llama3.2:3b"
 ## Features
 
 - Transcribe audio from any media file (m4a, mp4, wav, mp3, opus, webm)
-- Speaker diarization (who spoke when)
+- Speaker diarization (who spoke when) with GPU acceleration via Metal on Apple Silicon
 - LLM-powered meeting summaries with action items
 - Configurable output format with confidence indicators
 - Fast processing on Apple Silicon via whisper.cpp
@@ -160,6 +160,7 @@ transcribe-summarize meeting.m4a --dry-run
 | `-m, --model` | Whisper model (tiny/base/small/medium/large) | `base` |
 | `--llm` | LLM provider (claude/openai/ollama/auto) | `auto` |
 | `--preprocess` | Audio preprocessing (auto/none/analyze) | `auto` |
+| `--device` | Compute device for diarization (auto/cpu/mps/cuda) | `auto` |
 | `-v` | Verbosity (-v, -vv, -vvv) | quiet |
 | `--dry-run` | Show what would be done | - |
 
@@ -171,6 +172,7 @@ Create `~/.config/transcribe-summarize/config.yaml` or `.transcribe.yaml` in you
 model: small
 llm: auto
 preprocess: auto              # auto, none, or analyze
+device: auto                  # auto, cpu, mps (Apple Silicon), or cuda
 ollama_model: llama3.1:8b
 anthropic_api_key: sk-ant-...  # Overridden by ANTHROPIC_API_KEY env var
 openai_api_key: sk-...         # Overridden by OPENAI_API_KEY env var

@@ -35,6 +35,10 @@ llm: auto
 # Diarization works out-of-the-box using speechbrain (no setup required).
 # For higher quality, set up HuggingFace token for pyannote backend.
 
+# Compute device for diarization: auto, cpu, mps, cuda
+# auto = MPS on Apple Silicon, CUDA if available, else CPU
+device: auto
+
 # HuggingFace token for pyannote (overridden by HF_TOKEN env var)
 # hf_token: hf_...
 

@@ -36,10 +36,12 @@ struct Diarizer {
 
     private let verbose: Int
     private let speakerNames: [String]
+    private let device: String
 
-    init(verbose: Int = 0, speakerNames: [String] = []) {
+    init(verbose: Int = 0, speakerNames: [String] = [], device: String = "auto") {
         self.verbose = verbose
         self.speakerNames = speakerNames
+        self.device = device
     }
 
     /// Apply speaker labels to transcript segments.
@@ -87,12 +89,12 @@ struct Diarizer {
         let backend = token != nil ? "pyannote" : "speechbrain"
 
         if verbose > 0 {
-            print("Running speaker diarization (backend: \(backend))...")
+            print("Running speaker diarization (backend: \(backend), device: \(device))...")
         }
 
         let process = Process()
         process.executableURL = URL(fileURLWithPath: pythonExec)
-        process.arguments = [scriptPath, wavPath]
+        process.arguments = [scriptPath, wavPath, "--device", device]
 
         // Set environment for PyTorch 2.6+ compatibility
         var env = ProcessInfo.processInfo.environment

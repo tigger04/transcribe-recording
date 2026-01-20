@@ -44,12 +44,13 @@ final class IntegrationTests: XCTestCase {
             model: "",  // Empty = no CLI override
             llm: "auto",
             preprocess: "none",
+            device: "auto",
             verbose: 0,
             dryRun: true
         )
 
         // Should use config file value, not default "base"
-        XCTAssertEqual(config.model, .small, "Config file model 'small' should be used when CLI doesn't specify")
+        XCTAssertEqual(config.model, Config.WhisperModel.small, "Config file model 'small' should be used when CLI doesn't specify")
     }
 
     func testConfigUsesValueFromGlobalConfigFile() throws {
@@ -65,13 +66,14 @@ final class IntegrationTests: XCTestCase {
             model: "",  // Empty = no CLI override
             llm: "auto",
             preprocess: "none",
+            device: "auto",
             verbose: 0,
             dryRun: true
         )
 
         // Should use the global config file value "small"
         // (If this fails with "base", the config file isn't being read)
-        XCTAssertEqual(config.model, .small, "Global config file model 'small' should be used")
+        XCTAssertEqual(config.model, Config.WhisperModel.small, "Global config file model 'small' should be used")
     }
 
     func testCLIModelOverridesConfig() throws {
@@ -85,11 +87,12 @@ final class IntegrationTests: XCTestCase {
             model: "tiny",  // CLI specifies tiny
             llm: "auto",
             preprocess: "none",
+            device: "auto",
             verbose: 0,
             dryRun: true
         )
 
-        XCTAssertEqual(config.model, .tiny, "CLI model should override config file")
+        XCTAssertEqual(config.model, Config.WhisperModel.tiny, "CLI model should override config file")
     }
 
     // MARK: - API Key Resolution Tests

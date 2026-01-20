@@ -92,11 +92,16 @@ struct Config {
     let model: WhisperModel
     let llm: String
     let preprocess: PreprocessMode
+    let device: DeviceMode
     let verbose: Int
     let dryRun: Bool
 
     enum WhisperModel: String, CaseIterable {
         case tiny, base, small, medium, large
+    }
+
+    enum DeviceMode: String, CaseIterable {
+        case auto, cpu, mps, cuda
     }
 
     static func load(
@@ -108,6 +113,7 @@ struct Config {
         model: String,
         llm: String,
         preprocess: String,
+        device: String,
         verbose: Int,
         dryRun: Bool
     ) throws -> Config {
@@ -141,6 +147,12 @@ struct Config {
             ?? (yamlConfig?["preprocess"] as? String).flatMap { PreprocessMode(rawValue: $0) }
             ?? .auto
 
+        // Resolve device: CLI > YAML > env > default (auto)
+        let resolvedDevice = DeviceMode(rawValue: device)
+            ?? (yamlConfig?["device"] as? String).flatMap { DeviceMode(rawValue: $0) }
+            ?? ProcessInfo.processInfo.environment["TRANSCRIBE_DEVICE"].flatMap { DeviceMode(rawValue: $0) }
+            ?? .auto
+
         return Config(
             inputFile: inputFile,
             outputPath: resolvedOutput,
@@ -150,6 +162,7 @@ struct Config {
             model: resolvedModel,
             llm: resolvedLLM,
             preprocess: resolvedPreprocess,
+            device: resolvedDevice,
             verbose: verbose,
             dryRun: dryRun
         )

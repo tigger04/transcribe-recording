@@ -16,6 +16,7 @@ final class ConfigTests: XCTestCase {
             model: "base",
             llm: "claude",
             preprocess: "auto",
+            device: "auto",
             verbose: 0,
             dryRun: true
         )
@@ -33,6 +34,7 @@ final class ConfigTests: XCTestCase {
             model: "base",
             llm: "claude",
             preprocess: "auto",
+            device: "auto",
             verbose: 0,
             dryRun: true
         )
@@ -50,6 +52,7 @@ final class ConfigTests: XCTestCase {
             model: "base",
             llm: "claude",
             preprocess: "auto",
+            device: "auto",
             verbose: 0,
             dryRun: true
         )
@@ -67,6 +70,7 @@ final class ConfigTests: XCTestCase {
             model: "base",
             llm: "claude",
             preprocess: "auto",
+            device: "auto",
             verbose: 0,
             dryRun: true
         )
@@ -84,6 +88,7 @@ final class ConfigTests: XCTestCase {
             model: "base",
             llm: "claude",
             preprocess: "auto",
+            device: "auto",
             verbose: 0,
             dryRun: true
         )
@@ -101,6 +106,7 @@ final class ConfigTests: XCTestCase {
             model: "base",
             llm: "invalid",
             preprocess: "auto",
+            device: "auto",
             verbose: 0,
             dryRun: true
         )
@@ -118,6 +124,7 @@ final class ConfigTests: XCTestCase {
             model: "small",
             llm: "claude",
             preprocess: "auto",
+            device: "auto",
             verbose: 0,
             dryRun: true
         )
@@ -137,11 +144,104 @@ final class ConfigTests: XCTestCase {
             model: "base",
             llm: "auto",
             preprocess: "auto",
+            device: "auto",
             verbose: 0,
             dryRun: true
         )
 
         XCTAssertTrue(config.validate())
+    }
+
+    // MARK: - Device Mode Tests
+
+    func testDeviceModeDefaultsToAuto() throws {
+        let config = try Config.load(
+            inputFile: "/path/to/meeting.m4a",
+            output: nil,
+            speakers: nil,
+            timestamps: true,
+            confidence: 0.8,
+            model: "base",
+            llm: "auto",
+            preprocess: "auto",
+            device: "auto",
+            verbose: 0,
+            dryRun: true
+        )
+
+        XCTAssertEqual(config.device, .auto)
+    }
+
+    func testDeviceModeCPU() throws {
+        let config = try Config.load(
+            inputFile: "/path/to/meeting.m4a",
+            output: nil,
+            speakers: nil,
+            timestamps: true,
+            confidence: 0.8,
+            model: "base",
+            llm: "auto",
+            preprocess: "auto",
+            device: "cpu",
+            verbose: 0,
+            dryRun: true
+        )
+
+        XCTAssertEqual(config.device, .cpu)
+    }
+
+    func testDeviceModeMPS() throws {
+        let config = try Config.load(
+            inputFile: "/path/to/meeting.m4a",
+            output: nil,
+            speakers: nil,
+            timestamps: true,
+            confidence: 0.8,
+            model: "base",
+            llm: "auto",
+            preprocess: "auto",
+            device: "mps",
+            verbose: 0,
+            dryRun: true
+        )
+
+        XCTAssertEqual(config.device, .mps)
+    }
+
+    func testDeviceModeCUDA() throws {
+        let config = try Config.load(
+            inputFile: "/path/to/meeting.m4a",
+            output: nil,
+            speakers: nil,
+            timestamps: true,
+            confidence: 0.8,
+            model: "base",
+            llm: "auto",
+            preprocess: "auto",
+            device: "cuda",
+            verbose: 0,
+            dryRun: true
+        )
+
+        XCTAssertEqual(config.device, .cuda)
+    }
+
+    func testDeviceModeInvalidFallsBackToAuto() throws {
+        let config = try Config.load(
+            inputFile: "/path/to/meeting.m4a",
+            output: nil,
+            speakers: nil,
+            timestamps: true,
+            confidence: 0.8,
+            model: "base",
+            llm: "auto",
+            preprocess: "auto",
+            device: "invalid",
+            verbose: 0,
+            dryRun: true
+        )
+
+        XCTAssertEqual(config.device, .auto)
     }
 
     func testLLMSelectorDefaultPriority() {
