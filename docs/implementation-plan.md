@@ -68,9 +68,12 @@ transcribe-summarize
 
 1. AudioExtractor: ffmpeg wrapper to extract/convert audio to WAV
 2. Duration detection, minimum length check (10s default)
-3. Audio quality heuristics (optional: silence ratio, signal level)
+3. Audio quality analysis and automatic preprocessing (implemented)
+   - Analyzes mean/max volume, RMS level, noise floor, crest factor
+   - Auto-applies: amplification, denoising, normalization, dynamic compression
+   - Controlled via `--preprocess auto|none|analyze` flag
 
-**Deliverable:** Extracts audio from any media file to temp WAV
+**Deliverable:** Extracts audio from any media file to temp WAV with optional preprocessing
 
 ### Phase 3: Transcription
 
