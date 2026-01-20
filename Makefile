@@ -1,12 +1,19 @@
 # ABOUTME: Build, test, and install targets for transcribe-summarize.
 # ABOUTME: Use `make build` for release, `make test` to run tests, `make release` to publish.
 
-.PHONY: build test clean install install-venv uninstall release bump-version update-formula push-tap help
+.PHONY: build test clean install install-venv uninstall release bump-version update-formula push-tap help _check-clean
 
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 VENV_DIR := $(HOME)/.local/share/transcribe-summarize/venv
 REPO_URL := https://github.com/tigger04/transcribe-recording
 TAP_PATH := /opt/homebrew/Library/Taps/tigger04/homebrew-tap
+
+# Extract current version from main.swift and compute next version (increment patch by 1)
+CURRENT_VERSION := $(shell grep 'version: "[0-9]' Sources/TranscribeSummarize/main.swift 2>/dev/null | sed 's/.*"\([0-9.]*\)".*/\1/')
+NEXT_VERSION := $(shell echo "$(CURRENT_VERSION)" | awk -F. '{$$NF = $$NF + 1; print}' OFS=.)
+
+# Use V if provided, otherwise auto-increment
+V ?= $(NEXT_VERSION)
 
 build:
 	swift build -c release
@@ -56,14 +63,15 @@ help:
 	@echo "  uninstall     - Remove installed files and venv"
 	@echo ""
 	@echo "Release targets:"
-	@echo "  release V=x.y.z  - Full release: bump, tag, update formula, push tap"
-	@echo "  bump-version     - Just update version in main.swift (requires V=x.y.z)"
+	@echo "  release          - Full release: auto-increment version, tag, update formula, push tap"
+	@echo "  release V=x.y.z  - Full release with specific version"
+	@echo "  bump-version     - Just update version in main.swift (auto-increments or use V=x.y.z)"
 	@echo "  update-formula   - Update formula SHA256 for current tag"
 	@echo "  push-tap         - Copy formula to Homebrew tap and push"
 
 # Release management
-# Usage: make release V=0.2.0
-release: _check-version _check-clean test bump-version
+# Usage: make release (auto-increments) or make release V=0.2.0
+release: _check-clean test bump-version
 	@echo "Creating release v$(V)..."
 	git add Sources/TranscribeSummarize/main.swift
 	git commit -m "chore: bump version to $(V)"
@@ -81,8 +89,8 @@ release: _check-version _check-clean test bump-version
 	@echo "Release v$(V) complete!"
 	@echo "Run: brew update && brew upgrade transcribe-summarize"
 
-bump-version: _check-version
-	@echo "Bumping version to $(V)..."
+bump-version:
+	@echo "Bumping version from $(CURRENT_VERSION) to $(V)..."
 	sed -i.bak 's/version: "[0-9.]*"/version: "$(V)"/' Sources/TranscribeSummarize/main.swift && rm -f Sources/TranscribeSummarize/main.swift.bak
 	@echo "Version updated in main.swift"
 
@@ -118,11 +126,6 @@ push-tap:
 		echo "Warning: Tap not found at $(TAP_PATH)"; \
 		echo "Copy Formula/transcribe-summarize.rb to your tap manually"; \
 	fi
-
-_check-version:
-ifndef V
-	$(error Version required. Usage: make release V=x.y.z)
-endif
 
 _check-clean:
 	@if [ -n "$$(git status --porcelain)" ]; then \
