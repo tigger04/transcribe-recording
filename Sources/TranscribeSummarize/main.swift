@@ -26,7 +26,7 @@ struct TranscribeSummarize: AsyncParsableCommand {
               Priority: ollama > claude > openai (local-first, free before paid)
               Selects first provider with credentials configured.
             """,
-        version: "0.1.0"
+        version: "0.2.0"
     )
 
     @Argument(help: "Path to the audio/video file to transcribe.")

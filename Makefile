@@ -79,7 +79,7 @@ release: _check-version _check-clean test bump-version
 
 bump-version: _check-version
 	@echo "Bumping version to $(V)..."
-	@sed -i '' 's/version: "[^"]*"/version: "$(V)"/' Sources/TranscribeSummarize/main.swift
+	sed -i.bak 's/version: "[0-9.]*"/version: "$(V)"/' Sources/TranscribeSummarize/main.swift && rm -f Sources/TranscribeSummarize/main.swift.bak
 	@echo "Version updated in main.swift"
 
 update-formula:
@@ -97,8 +97,8 @@ update-formula:
 		exit 1; \
 	fi; \
 	echo "SHA256: $$SHA256"; \
-	sed -i '' "s|url \".*\"|url \"$$URL\"|" Formula/transcribe-summarize.rb; \
-	sed -i '' "s/sha256 \"[^\"]*\"/sha256 \"$$SHA256\"/" Formula/transcribe-summarize.rb; \
+	sed -i.bak "s|url \".*\"|url \"$$URL\"|" Formula/transcribe-summarize.rb && rm -f Formula/transcribe-summarize.rb.bak; \
+	sed -i.bak "s/sha256 \"[a-f0-9]*\"/sha256 \"$$SHA256\"/" Formula/transcribe-summarize.rb && rm -f Formula/transcribe-summarize.rb.bak; \
 	echo "Formula updated with version $$VERSION"
 
 _check-version:
