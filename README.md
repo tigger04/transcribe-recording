@@ -15,6 +15,18 @@ Turn your meeting recordings into useful documents, automatically.
 
 *macOS only — requires Apple Silicon or Intel Mac.*
 
+# Rationale
+Dozens of commercial apps offer meeting transcription and summarisation, all built on open-source technology. This project makes that capability freely available, with no accounts or subscriptions required.
+
+# Practical Usage
+Open QuickTime Player, select File → New Audio Recording, record your meeting, then run the file through this tool.
+
+# Etiquette
+Consider informing participants that you're using transcription software. I've yet to have an objection, though I'd honour one.
+
+# Accessibility
+This is currently a command-line tool. I know that can intimidate some users. I'd welcome collaboration from a developer with UI experience to create a graphical interface. Open an issue on GitHub if interested, I'd love to hear from you!
+
 ## Quickstart
 
 ```bash
