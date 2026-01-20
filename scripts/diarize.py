@@ -33,11 +33,19 @@ For pyannote, you must accept ALL THREE model licenses:
 
 import argparse
 import json
+import logging
 import os
 import sys
 import warnings
 
 warnings.filterwarnings("ignore")
+
+# Suppress speechbrain's misleading torchaudio backend warning.
+# SpeechBrain now uses soundfile as its audio backend (torchaudio deprecated audio I/O
+# in v2.9), but still emits a logger.warning() during initialization claiming no backend
+# was found. This is cosmetic - audio loading works fine via soundfile.
+# See: https://github.com/speechbrain/speechbrain/issues/2579
+logging.getLogger('speechbrain.utils.torch_audio_backend').setLevel(logging.ERROR)
 
 # Patch for torchaudio 2.9+ which removed list_audio_backends
 # Must be done early before any audio library imports
