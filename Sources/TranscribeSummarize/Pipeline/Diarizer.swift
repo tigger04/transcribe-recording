@@ -102,6 +102,11 @@ struct Diarizer {
         process.executableURL = URL(fileURLWithPath: pythonExec)
         process.arguments = [scriptPath, wavPath]
 
+        // Set environment for PyTorch 2.6+ compatibility
+        var env = ProcessInfo.processInfo.environment
+        env["TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD"] = "1"
+        process.environment = env
+
         let stdoutPipe = Pipe()
         let stderrPipe = Pipe()
         process.standardOutput = stdoutPipe

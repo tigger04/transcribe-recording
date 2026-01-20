@@ -20,8 +20,10 @@ Requires:
 HuggingFace token required - get one at:
   https://huggingface.co/settings/tokens
 
-You must also accept the model license at:
+You must accept ALL THREE model licenses:
   https://huggingface.co/pyannote/speaker-diarization-3.1
+  https://huggingface.co/pyannote/segmentation-3.0
+  https://huggingface.co/pyannote/speaker-diarization-community-1
 """
 
 import argparse
@@ -64,7 +66,14 @@ def main():
             token=token
         )
 
-        diarization = pipeline(args.audio_file)
+        result = pipeline(args.audio_file)
+
+        # pyannote.audio 4.x returns DiarizeOutput, need to access .speaker_diarization
+        # pyannote.audio 3.x returns Annotation directly
+        if hasattr(result, 'speaker_diarization'):
+            diarization = result.speaker_diarization
+        else:
+            diarization = result
 
         segments = []
         for turn, _, speaker in diarization.itertracks(yield_label=True):

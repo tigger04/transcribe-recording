@@ -21,7 +21,10 @@ transcribe-summarize meeting.m4a
 To identify who said what, set a HuggingFace token:
 
 1. Create account: https://huggingface.co
-2. Accept license: https://huggingface.co/pyannote/speaker-diarization-3.1
+2. Accept **all three** model licenses (click "Agree and access repository" on each):
+   - https://huggingface.co/pyannote/speaker-diarization-3.1
+   - https://huggingface.co/pyannote/segmentation-3.0
+   - https://huggingface.co/pyannote/speaker-diarization-community-1
 3. Generate token: https://huggingface.co/settings/tokens
 4. `export HF_TOKEN="your_token"`
 
