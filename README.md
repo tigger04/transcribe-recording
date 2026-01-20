@@ -31,6 +31,8 @@ To identify who said what, set a HuggingFace token:
 On first use with HF_TOKEN set, the tool will automatically set up the Python
 environment for diarization (one-time, ~800MB download).
 
+> **TODO:** We're investigating [speechbrain](https://speechbrain.github.io/) as an alternative diarization engine with a permissive Apache 2.0 license. This would eliminate the need for HuggingFace account setup. See [#20](https://github.com/tigger04/transcribe-recording/issues/20) for progress.
+
 ### LLM Configuration
 
 By default, transcribe-summarize uses **auto-selection** to choose an LLM provider based on what's configured:
