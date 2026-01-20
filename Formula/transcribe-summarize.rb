@@ -4,8 +4,8 @@
 class TranscribeSummarize < Formula
   desc "Transcribe audio, summarize via Ollama/Claude/OpenAI, identify speakers"
   homepage "https://github.com/tigger04/transcribe-recording"
-  url "https://github.com/tigger04/transcribe-recording/archive/refs/tags/v0.2.5.tar.gz"
-  sha256 "5308ea81487de0a62ac03735bdf7968350b70f30a4ce8e44ceef7c15e0a57310"
+  url "https://github.com/tigger04/transcribe-recording/archive/refs/tags/v0.2.6.tar.gz"
+  sha256 "13cacfabc9739251679e96ae63d385706bf7e2b96da1ce7fdd7b15fe3d81e06b"
   license "MIT"
 
   depends_on xcode: ["15.0", :build]
