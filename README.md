@@ -1,8 +1,17 @@
 # transcribe-summarize
 
-Transcribe audio files and generate structured meeting summaries with speaker identification.
+Turn your meeting recordings into useful documents, automatically.
 
-**macOS only** — requires Apple Silicon or Intel Mac. Written in Swift using whisper.cpp for fast native transcription.
+**What it does:** You give it an audio file from a meeting, interview, or conversation. It gives you back a readable document with:
+- A summary of key points and action items
+- A full transcript with timestamps
+- Speaker labels ("Alice said this, Bob said that")
+
+**How it works:** Everything runs locally on your Mac - your audio never leaves your computer. The tool uses AI to transcribe speech (via whisper.cpp), identify different speakers (via speechbrain), and summarize the conversation (via Ollama).
+
+**No accounts needed:** Works out of the box without any API keys or signups. Just install and run.
+
+*macOS only — requires Apple Silicon or Intel Mac.*
 
 ## Quickstart
 
@@ -16,7 +25,7 @@ Basic usage:
 transcribe-summarize meeting.m4a
 ```
 
-**Works out of the box** — transcription, speaker diarization, and summarization all work without any API keys or account setup using local models (Ollama + speechbrain). Start here, then optionally add API keys for higher quality.
+That's it! Everything works out of the box. Optionally, you can add API keys for higher quality results (see below).
 
 ### Improving Quality (Optional)
 
