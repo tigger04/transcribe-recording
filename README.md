@@ -1,6 +1,6 @@
-# transcribe-summarize
+# Transcribe-Summarize
 
-Turn your meeting recordings into useful documents, automatically.
+Turn meeting recordings into structured documents with transcripts, speaker labels, and summaries—all locally.
 
 **What it does:** You give it an audio file from a meeting, interview, or conversation. It gives you back a readable document with:
 - A summary of key points and action items
@@ -16,10 +16,10 @@ Turn your meeting recordings into useful documents, automatically.
 *macOS only — requires Apple Silicon or Intel Mac.*
 
 # Rationale
-Dozens of commercial apps offer meeting transcription and summarisation, all built on open-source technology. This project makes that capability freely available, with no accounts or subscriptions required.
+Dozens of commercial apps offer meeting transcription and summarization, all built on open-source technology. This project makes that capability freely available, with no accounts or subscriptions required.
 
 # Practical Usage
-Open QuickTime Player, select File → New Audio Recording, record your meeting, then run the file through this tool.
+Open QuickTime Player, select File -> New Audio Recording, record your meeting, then run the file through this tool.
 
 # Etiquette
 Consider informing participants that you're using transcription software. I've yet to have an objection, though I'd honour one.
