@@ -61,7 +61,7 @@ def main():
     try:
         pipeline = Pipeline.from_pretrained(
             "pyannote/speaker-diarization-3.1",
-            use_auth_token=token
+            token=token
         )
 
         diarization = pipeline(args.audio_file)
