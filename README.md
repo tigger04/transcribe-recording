@@ -16,7 +16,7 @@ Turn meeting recordings into structured documents with transcripts, speaker labe
 *macOS only — requires Apple Silicon or Intel Mac.*
 
 # Rationale
-Dozens of commercial apps offer meeting transcription and summarization, all built on open-source technology. This project makes that capability freely available, with no accounts or subscriptions required.
+Dozens of commercial apps offer meeting transcription and summarization, for a tidy fee, despite being built on open-source technologies. This project makes that capability freely available, with no accounts or subscriptions required.
 
 # Practical Usage
 Open QuickTime Player, select File -> New Audio Recording, record your meeting, then run the file through this tool.
