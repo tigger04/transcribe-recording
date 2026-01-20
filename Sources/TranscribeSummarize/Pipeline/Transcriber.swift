@@ -14,7 +14,7 @@ struct Transcriber {
         var errorDescription: String? {
             switch self {
             case .whisperNotFound:
-                return "whisper-cpp not found. Install with: brew install whisper-cpp"
+                return "whisper-cli not found. Install with: brew install whisper-cpp"
             case .modelNotFound(let model):
                 return "Whisper model '\(model)' not found. Will attempt download."
             case .downloadFailed(let msg):
@@ -58,13 +58,23 @@ struct Transcriber {
             .appendingPathComponent(".cache/whisper")
     }
 
+    // Find the whisper binary - try whisper-cli first (new), then whisper-cpp (old)
+    private func findWhisperBinary() -> String? {
+        for binary in ["whisper-cli", "whisper-cpp"] {
+            if commandExists(binary) {
+                return binary
+            }
+        }
+        return nil
+    }
+
     func transcribe(wavPath: String) async throws -> [Segment] {
-        guard commandExists("whisper-cpp") else {
+        guard let whisperBinary = findWhisperBinary() else {
             throw TranscribeError.whisperNotFound
         }
 
         let modelPath = try await ensureModel()
-        let segments = try await runWhisper(wavPath: wavPath, modelPath: modelPath)
+        let segments = try await runWhisper(wavPath: wavPath, modelPath: modelPath, binary: whisperBinary)
 
         return segments
     }
@@ -114,7 +124,7 @@ struct Transcriber {
         }
     }
 
-    private func runWhisper(wavPath: String, modelPath: String) async throws -> [Segment] {
+    private func runWhisper(wavPath: String, modelPath: String, binary: String) async throws -> [Segment] {
         let tempDir = FileManager.default.temporaryDirectory
         let outputBase = tempDir.appendingPathComponent(UUID().uuidString).path
 
@@ -123,16 +133,16 @@ struct Transcriber {
             "-f", wavPath,
             "-oj",
             "-of", outputBase,
-            "--print-progress", "true"
+            "-pp"  // print progress
         ]
 
         if verbose > 0 {
-            print("Running whisper-cpp...")
+            print("Running \(binary)...")
         }
 
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-        process.arguments = ["whisper-cpp"] + args
+        process.arguments = [binary] + args
 
         let stderrPipe = Pipe()
         process.standardError = stderrPipe
