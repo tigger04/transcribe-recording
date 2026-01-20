@@ -1,11 +1,11 @@
-# transcribe-summarize
+# Transcribe-Summarize
 
-Turn your meeting recordings into useful documents, automatically.
+Turn meeting recordings into structured documents with transcripts, speaker labels, and summaries—all locally.
 
 **What it does:** You give it an audio file from a meeting, interview, or conversation. It gives you back a readable document with:
 - A summary of key points and action items
 - A full transcript with timestamps
-- Speaker labels ("Alice said this, Bob said that")
+- Speaker attribution (identifying who said what)
 
 **How it works:** Everything runs locally on your Mac - your audio never leaves your computer.* The tool uses AI to transcribe speech (via whisper.cpp), identify different speakers (via speechbrain), and summarize the conversation (via Ollama).
 
@@ -14,6 +14,18 @@ Turn your meeting recordings into useful documents, automatically.
 <sub>* If you optionally configure Claude or OpenAI API keys for summarization, your transcript text (not audio) will be sent to those services.</sub>
 
 *macOS only — requires Apple Silicon or Intel Mac.*
+
+# Rationale
+Dozens of commercial apps offer meeting transcription and summarization, all built on open-source technology. This project makes that capability freely available, with no accounts or subscriptions required.
+
+# Practical Usage
+Open QuickTime Player, select File -> New Audio Recording, record your meeting, then run the file through this tool.
+
+# Etiquette
+Consider informing participants that you're using transcription software. I've yet to have an objection, though I'd honour one.
+
+# Accessibility
+This is currently a command-line tool. I know that can intimidate some users. I'd welcome collaboration from a developer with UI experience to create a graphical interface. Open an issue on GitHub if interested, I'd love to hear from you!
 
 ## Quickstart
 
