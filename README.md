@@ -117,8 +117,8 @@ ollama pull llama3.1:8b
 ### Build and Install
 
 ```bash
-git clone https://github.com/tigger04/transcribe-recording.git
-cd transcribe-recording
+git clone https://github.com/tigger04/transcribe-summarize.git
+cd transcribe-summarize
 make install
 ```
 

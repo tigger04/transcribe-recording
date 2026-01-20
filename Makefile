@@ -5,7 +5,7 @@
 
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 VENV_DIR := $(HOME)/.local/share/transcribe-summarize/venv
-REPO_URL := https://github.com/tigger04/transcribe-recording
+REPO_URL := https://github.com/tigger04/transcribe-summarize
 TAP_PATH := /opt/homebrew/Library/Taps/tigger04/homebrew-tap
 
 # Extract current version from main.swift and compute next version (increment patch by 1)
