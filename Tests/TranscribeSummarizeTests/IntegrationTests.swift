@@ -43,6 +43,7 @@ final class IntegrationTests: XCTestCase {
             confidence: 0.8,
             model: "",  // Empty = no CLI override
             llm: "auto",
+            preprocess: "none",
             verbose: 0,
             dryRun: true
         )
@@ -63,6 +64,7 @@ final class IntegrationTests: XCTestCase {
             confidence: 0.8,
             model: "",  // Empty = no CLI override
             llm: "auto",
+            preprocess: "none",
             verbose: 0,
             dryRun: true
         )
@@ -82,6 +84,7 @@ final class IntegrationTests: XCTestCase {
             confidence: 0.8,
             model: "tiny",  // CLI specifies tiny
             llm: "auto",
+            preprocess: "none",
             verbose: 0,
             dryRun: true
         )
@@ -148,9 +151,9 @@ final class IntegrationTests: XCTestCase {
             throw XCTSkip("whisper-cli not installed")
         }
 
-        // Extract audio
+        // Extract audio (with no preprocessing for speed)
         let extractor = AudioExtractor(verbose: 0)
-        let (wavPath, info) = try await extractor.extract(from: samplePath, minimumDuration: 10.0)
+        let (wavPath, info, _) = try await extractor.extract(from: samplePath, minimumDuration: 10.0, preprocess: .none)
         defer { AudioExtractor.cleanup(wavPath) }
 
         XCTAssertGreaterThan(info.duration, 100.0, "Sample should be > 100s")

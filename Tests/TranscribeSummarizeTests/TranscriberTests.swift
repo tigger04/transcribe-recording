@@ -51,7 +51,7 @@ final class TranscriberTests: XCTestCase {
     func testTranscribeProducesSegments() async throws {
         // First convert to WAV (required by Transcriber)
         let extractor = AudioExtractor(verbose: 0)
-        let (path, _) = try await extractor.extract(from: samplePath, minimumDuration: 10.0)
+        let (path, _, _) = try await extractor.extract(from: samplePath, minimumDuration: 10.0, preprocess: .none)
         wavPath = path
 
         // Use tiny model for speed
@@ -76,7 +76,7 @@ final class TranscriberTests: XCTestCase {
 
     func testTranscribeSegmentsAreOrdered() async throws {
         let extractor = AudioExtractor(verbose: 0)
-        let (path, _) = try await extractor.extract(from: samplePath, minimumDuration: 10.0)
+        let (path, _, _) = try await extractor.extract(from: samplePath, minimumDuration: 10.0, preprocess: .none)
         wavPath = path
 
         let transcriber = Transcriber(model: .tiny, verbose: 0)

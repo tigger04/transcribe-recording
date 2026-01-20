@@ -91,6 +91,7 @@ struct Config {
     let confidence: Double
     let model: WhisperModel
     let llm: String
+    let preprocess: PreprocessMode
     let verbose: Int
     let dryRun: Bool
 
@@ -106,6 +107,7 @@ struct Config {
         confidence: Double,
         model: String,
         llm: String,
+        preprocess: String,
         verbose: Int,
         dryRun: Bool
     ) throws -> Config {
@@ -134,6 +136,11 @@ struct Config {
             ?? ProcessInfo.processInfo.environment["TRANSCRIBE_LLM"]
             ?? "auto"
 
+        // Resolve preprocess: CLI > YAML > default (auto)
+        let resolvedPreprocess = PreprocessMode(rawValue: preprocess)
+            ?? (yamlConfig?["preprocess"] as? String).flatMap { PreprocessMode(rawValue: $0) }
+            ?? .auto
+
         return Config(
             inputFile: inputFile,
             outputPath: resolvedOutput,
@@ -142,6 +149,7 @@ struct Config {
             confidence: confidence,
             model: resolvedModel,
             llm: resolvedLLM,
+            preprocess: resolvedPreprocess,
             verbose: verbose,
             dryRun: dryRun
         )

@@ -45,7 +45,7 @@ final class AudioExtractorTests: XCTestCase {
 
     func testExtractCreatesValidWav() async throws {
         let extractor = AudioExtractor(verbose: 0)
-        let (wavPath, info) = try await extractor.extract(from: samplePath, minimumDuration: 10.0)
+        let (wavPath, info, _) = try await extractor.extract(from: samplePath, minimumDuration: 10.0, preprocess: .none)
 
         defer { AudioExtractor.cleanup(wavPath) }
 
@@ -67,7 +67,7 @@ final class AudioExtractorTests: XCTestCase {
 
         do {
             // Request minimum 200 seconds, but sample is only ~113 seconds
-            _ = try await extractor.extract(from: samplePath, minimumDuration: 200.0)
+            _ = try await extractor.extract(from: samplePath, minimumDuration: 200.0, preprocess: .none)
             XCTFail("Expected error for too-short audio")
         } catch let error as AudioExtractor.AudioError {
             if case .tooShort(let duration, let minimum) = error {
@@ -83,7 +83,7 @@ final class AudioExtractorTests: XCTestCase {
         let extractor = AudioExtractor(verbose: 0)
 
         do {
-            _ = try await extractor.extract(from: "/nonexistent/file.mp3")
+            _ = try await extractor.extract(from: "/nonexistent/file.mp3", preprocess: .none)
             XCTFail("Expected error for missing file")
         } catch {
             // Expected - file doesn't exist
@@ -95,7 +95,7 @@ final class AudioExtractorTests: XCTestCase {
 
     func testCleanupRemovesFile() async throws {
         let extractor = AudioExtractor(verbose: 0)
-        let (wavPath, _) = try await extractor.extract(from: samplePath, minimumDuration: 10.0)
+        let (wavPath, _, _) = try await extractor.extract(from: samplePath, minimumDuration: 10.0, preprocess: .none)
 
         XCTAssertTrue(FileManager.default.fileExists(atPath: wavPath))
 
@@ -108,5 +108,46 @@ final class AudioExtractorTests: XCTestCase {
         // Should not throw for non-existent file
         AudioExtractor.cleanup("/nonexistent/file.wav")
         // If we get here without crashing, the test passes
+    }
+
+    // MARK: - Audio Analysis Tests
+
+    func testAnalyzeAudioReturnsMetrics() async throws {
+        let extractor = AudioExtractor(verbose: 0)
+        let metrics = try await extractor.analyzeAudio(samplePath)
+
+        // Verify metrics are in reasonable ranges
+        XCTAssertLessThan(metrics.meanVolume, 0, "Mean volume should be negative (dB)")
+        XCTAssertLessThan(metrics.maxVolume, 0, "Max volume should be negative (dB)")
+        XCTAssertLessThan(metrics.rmsLevel, 0, "RMS level should be negative (dB)")
+        XCTAssertGreaterThan(metrics.crestFactor, 0, "Crest factor should be positive")
+
+        // Verify description is generated
+        XCTAssertFalse(metrics.description.isEmpty, "Description should not be empty")
+        XCTAssertTrue(metrics.description.contains("Audio Quality Metrics:"), "Description should contain header")
+    }
+
+    func testPreprocessModeAuto() async throws {
+        let extractor = AudioExtractor(verbose: 0)
+        let (wavPath, info, metrics) = try await extractor.extract(from: samplePath, minimumDuration: 10.0, preprocess: .auto)
+
+        defer { AudioExtractor.cleanup(wavPath) }
+
+        // With auto mode, metrics should be captured
+        XCTAssertNotNil(metrics, "Metrics should be captured in auto mode")
+        XCTAssertTrue(FileManager.default.fileExists(atPath: wavPath), "WAV file should exist")
+        XCTAssertGreaterThan(info.duration, 100.0, "Duration should be preserved")
+    }
+
+    func testPreprocessModeNone() async throws {
+        let extractor = AudioExtractor(verbose: 0)
+        let (wavPath, info, metrics) = try await extractor.extract(from: samplePath, minimumDuration: 10.0, preprocess: .none)
+
+        defer { AudioExtractor.cleanup(wavPath) }
+
+        // With none mode, metrics should be nil
+        XCTAssertNil(metrics, "Metrics should be nil in none mode")
+        XCTAssertTrue(FileManager.default.fileExists(atPath: wavPath), "WAV file should exist")
+        XCTAssertGreaterThan(info.duration, 100.0, "Duration should be preserved")
     }
 }

@@ -15,6 +15,7 @@ final class ConfigTests: XCTestCase {
             confidence: 0.8,
             model: "base",
             llm: "claude",
+            preprocess: "auto",
             verbose: 0,
             dryRun: true
         )
@@ -31,6 +32,7 @@ final class ConfigTests: XCTestCase {
             confidence: 0.8,
             model: "base",
             llm: "claude",
+            preprocess: "auto",
             verbose: 0,
             dryRun: true
         )
@@ -47,6 +49,7 @@ final class ConfigTests: XCTestCase {
             confidence: 0.8,
             model: "base",
             llm: "claude",
+            preprocess: "auto",
             verbose: 0,
             dryRun: true
         )
@@ -63,6 +66,7 @@ final class ConfigTests: XCTestCase {
             confidence: 0.8,
             model: "base",
             llm: "claude",
+            preprocess: "auto",
             verbose: 0,
             dryRun: true
         )
@@ -79,6 +83,7 @@ final class ConfigTests: XCTestCase {
             confidence: 1.5,
             model: "base",
             llm: "claude",
+            preprocess: "auto",
             verbose: 0,
             dryRun: true
         )
@@ -95,6 +100,7 @@ final class ConfigTests: XCTestCase {
             confidence: 0.8,
             model: "base",
             llm: "invalid",
+            preprocess: "auto",
             verbose: 0,
             dryRun: true
         )
@@ -111,6 +117,7 @@ final class ConfigTests: XCTestCase {
             confidence: 0.8,
             model: "small",
             llm: "claude",
+            preprocess: "auto",
             verbose: 0,
             dryRun: true
         )
@@ -129,6 +136,7 @@ final class ConfigTests: XCTestCase {
             confidence: 0.8,
             model: "base",
             llm: "auto",
+            preprocess: "auto",
             verbose: 0,
             dryRun: true
         )

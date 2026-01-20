@@ -121,6 +121,7 @@ transcribe-summarize meeting.m4a --dry-run
 | `-c, --confidence` | Minimum confidence threshold | `0.8` |
 | `-m, --model` | Whisper model (tiny/base/small/medium/large) | `base` |
 | `--llm` | LLM provider (claude/openai/ollama/auto) | `auto` |
+| `--preprocess` | Audio preprocessing (auto/none/analyze) | `auto` |
 | `-v` | Verbosity (-v, -vv, -vvv) | quiet |
 | `--dry-run` | Show what would be done | - |
 
@@ -131,6 +132,7 @@ Create `~/.config/transcribe-summarize/config.yaml` or `.transcribe.yaml` in you
 ```yaml
 model: small
 llm: auto
+preprocess: auto              # auto, none, or analyze
 ollama_model: llama3.1:8b
 anthropic_api_key: sk-ant-...  # Overridden by ANTHROPIC_API_KEY env var
 openai_api_key: sk-...         # Overridden by OPENAI_API_KEY env var
