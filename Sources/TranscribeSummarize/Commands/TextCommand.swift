@@ -7,15 +7,15 @@ import Foundation
 struct TextCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "text",
-        abstract: "Generate a plain text or markdown transcript."
+        abstract: HelpText.text(.textAbstract)
     )
 
     @OptionGroup var common: CommonOptions
 
-    @Option(name: .long, help: "Output format: txt, md, docx, odt, pdf, html (default: txt)")
+    @Option(name: .long, help: HelpText.argument(.textFormat))
     var format: String?
 
-    @Flag(inversion: .prefixedNo, help: "Include timestamps (default: false)")
+    @Flag(inversion: .prefixedNo, help: HelpText.argument(.textTimestamps))
     var timestamps: Bool = false
 
     mutating func run() async throws {

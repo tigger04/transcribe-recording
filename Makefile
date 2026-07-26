@@ -39,6 +39,7 @@ install: build
 	ln -sf $(BINARY_NAME) $(HOME)/.local/bin/$(LEGACY_NAME)
 	install -d $(HOME)/.local/share/transcribe-summarize
 	install -m 644 scripts/diarize.py $(HOME)/.local/share/transcribe-summarize/
+	install -m 644 docs/transcribe-help.md $(HOME)/.local/share/transcribe-summarize/
 	@echo "Installed to ~/.local/bin/ (symlinked to build output)."
 	@echo "Note: '$(LEGACY_NAME)' symlink installed for backward compatibility."
 	@echo "Ensure ~/.local/bin is in your PATH."

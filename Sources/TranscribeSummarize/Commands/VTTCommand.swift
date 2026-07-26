@@ -7,15 +7,15 @@ import Foundation
 struct VTTCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "vtt",
-        abstract: "Generate WebVTT subtitles from audio/video."
+        abstract: HelpText.text(.vttAbstract)
     )
 
     @OptionGroup var common: CommonOptions
 
-    @Option(name: .long, help: "Maximum subtitle line length in characters (default: 48, 0 = unlimited)")
+    @Option(name: .long, help: HelpText.argument(.subtitleMaxLength))
     var maxLen: Int = 48
 
-    @Flag(inversion: .prefixedNo, help: "Split at word boundaries when using --max-len (default: true)")
+    @Flag(inversion: .prefixedNo, help: HelpText.argument(.subtitleSplitOnWord))
     var splitOnWord: Bool = true
 
     mutating func run() async throws {

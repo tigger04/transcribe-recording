@@ -7,32 +7,25 @@ import Foundation
 struct SummarizeCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "summarize",
-        abstract: "Transcribe and generate an LLM-powered meeting summary.",
-        discussion: """
-            Runs the full pipeline: extract audio, transcribe with whisper.cpp,
-            identify speakers, generate summary via LLM, and write markdown output.
-
-            LLM auto-selection (--llm auto):
-              Default priority: ollama > claude > openai
-              Customize with llm_priority in config file.
-            """
+        abstract: HelpText.text(.summarizeAbstract),
+        discussion: HelpText.text(.summarizeDiscussion)
     )
 
     @OptionGroup var common: CommonOptions
 
-    @Option(name: .long, help: "Output format: md, docx, odt, pdf, html (default: md)")
+    @Option(name: .long, help: HelpText.argument(.summarizeFormat))
     var format: String?
 
-    @Flag(name: [.short, .long], inversion: .prefixedNo, help: "Include timestamps (default: true)")
+    @Flag(name: [.short, .long], inversion: .prefixedNo, help: HelpText.argument(.summarizeTimestamps))
     var timestamps: Bool = true
 
-    @Option(name: [.short, .long], help: "Minimum confidence threshold (0.0-1.0, default: 0.8)")
+    @Option(name: [.short, .long], help: HelpText.argument(.summarizeConfidence))
     var confidence: Double = 0.8
 
-    @Option(name: .long, help: "LLM provider: claude, openai, ollama, auto (default: auto)")
+    @Option(name: .long, help: HelpText.argument(.summarizeLLM))
     var llm: String = "auto"
 
-    @Flag(name: .long, help: "Show what would be done without processing")
+    @Flag(name: .long, help: HelpText.argument(.summarizeDryRun))
     var dryRun: Bool = false
 
     mutating func run() async throws {

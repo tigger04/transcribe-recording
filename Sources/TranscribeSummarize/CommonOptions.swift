@@ -5,25 +5,25 @@ import ArgumentParser
 import Foundation
 
 struct CommonOptions: ParsableArguments {
-    @Argument(help: "Path to the audio/video file to transcribe.")
+    @Argument(help: HelpText.argument(.commonInputFile))
     var inputFile: String
 
-    @Option(name: [.short, .long], help: "Output path (default: input basename + format extension)")
+    @Option(name: [.short, .long], help: HelpText.argument(.commonOutput))
     var output: String?
 
-    @Option(name: [.short, .long], help: "Whisper model size (tiny, base, small, medium, large, default: small)")
+    @Option(name: [.short, .long], help: HelpText.argument(.commonModel))
     var model: String?
 
-    @Option(name: [.short, .long], help: "Speaker names (comma-separated or path to file)")
+    @Option(name: [.short, .long], help: HelpText.argument(.commonSpeakers))
     var speakers: String?
 
-    @Option(name: .long, help: "Audio preprocessing: auto, none, analyze (default: auto)")
+    @Option(name: .long, help: HelpText.argument(.commonPreprocess))
     var preprocess: String = "auto"
 
-    @Option(name: .long, help: "Compute device for diarization: auto, cpu, mps, cuda (default: auto)")
+    @Option(name: .long, help: HelpText.argument(.commonDevice))
     var device: String = "auto"
 
-    @Flag(name: [.short, .long], help: "Increase logging verbosity")
+    @Flag(name: [.short, .long], help: HelpText.argument(.commonVerbose))
     var verbose: Int
 
     /// Resolve the output path, using default extension if not explicitly set.

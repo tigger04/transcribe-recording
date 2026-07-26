@@ -1,109 +1,89 @@
-# Vision: Audio Transcription and Meeting Summary Tool
+<!-- Version: 2.0 | Last updated: 2026-07-26 -->
+
+# Vision: local audio transcription and summarization
 
 ## Purpose
 
-A CLI script that transcribes audio from any media file and produces a structured markdown document containing an intelligent summary and full transcript with speaker identification.
+Transcribe turns local audio or video recordings into useful, portable outputs
+without requiring an account or hosted transcription service. It supports
+meeting summaries, readable transcripts, subtitles, and detailed timestamp data.
 
-## Input Handling
+## Product principles
 
-- Accept any media file containing audio (m4a, mp4, wav, mp3, opus, webm, etc.)
-- Configurable output path/naming convention (default: same directory, same basename with .md extension)
-- Minimum audio length threshold (default: 10 seconds) to avoid processing trivial clips
-- Graceful failure with clear error messages for:
-  - Unsupported formats
-  - Corrupted/unreadable files
-  - Poor audio quality (with confidence threshold)
+- Local processing is the default. Audio remains on the machine.
+- Cloud LLM providers are optional and receive transcript text, not audio.
+- Each output has a dedicated subcommand with command-specific help.
+- Common processing and speaker options behave consistently across subcommands.
+- Outputs use open or widely supported formats.
+- Failures identify the affected dependency or invalid input clearly.
 
-## Speaker Identification (Diarization)
+## Command outcomes
 
-- Identify and label different speakers in the transcript
-- Default to "Speaker 1", "Speaker 2", etc.
-- Optional: provide known speaker names via CLI flag or config file to map to identified voices
-- If diarization fails: proceed with unlabelled transcript and warn user
+| Command | Outcome | Default extension |
+|---|---|---|
+| `transcribe summarize INPUT` | Transcript and LLM-powered meeting summary | `.md` |
+| `transcribe text INPUT` | Plain-text or Markdown transcript | `.txt` |
+| `transcribe srt INPUT` | SRT subtitles | `.srt` |
+| `transcribe vtt INPUT` | WebVTT subtitles | `.vtt` |
+| `transcribe words INPUT` | Full whisper.cpp JSON with token timestamps | `.json` |
 
-## Output Structure
+Converted `docx`, `odt`, `pdf`, and `html` output is available where documented
+through Pandoc.
 
-Single markdown file with the following structure:
+## Timestamped JSON
 
-```
-# [Meeting Title or Filename]
+The `words` subcommand writes full whisper.cpp JSON to a file. Each transcription
+segment contains a `tokens` array, and each token carries `timestamps` and numeric
+`offsets`. Tokens may represent words, punctuation, or word fragments.
 
-**Date:** [from metadata or spoken, if detected]  
-**Duration:** [total runtime]  
-**Participants:** [list if identifiable]  
-**Transcription Confidence:** [overall percentage or rating]
+The JSON document is written to the default `<input>.json` path or the path
+provided with `--output`. Status and progress messages are not the JSON payload
+and must not be redirected into the output file.
 
-## Summary
+## Input handling
 
-### Agenda
-[If articulated in the meeting]
+- Supported media extensions include `m4a`, `mp4`, `wav`, `mp3`, `opus`, `webm`,
+  `aac`, `flac`, `ogg`, and `mov`.
+- Audio shorter than ten seconds is rejected.
+- `ffprobe` validates duration and media readability.
+- `ffmpeg` extracts mono WAV audio and can analyse or preprocess it.
+- Whisper models are selected by name and downloaded locally when required.
 
-### Key Points
-- Decisions made
-- Significant discussion items
-- Questions raised but not resolved
+## Speaker identification
 
-### Themes and Tone
-[Brief characterization of the meeting's nature]
+Speaker diarization is optional for every subcommand through `--speakers`.
+Speechbrain is the local default. Pyannote can be selected when its model access
+and Hugging Face token are configured. Supplied names are assigned in order of
+first appearance.
 
-### Actions
-| Action | Assigned To | Due Date (if stated) |
-|--------|-------------|----------------------|
-| ...    | ...         | ...                  |
+## Summarization
 
-### Conclusion
-[How the meeting ended, any agreed next steps]
-
-## Transcript
-
-[HH:MM:SS] **Speaker 1:** Lorem ipsum...  
-[HH:MM:SS] **Speaker 2:** Dolor sit amet...  
-
-[Confidence: low] [HH:MM:SS] **Speaker 1:** [inaudible] ...amet consectetur...
-```
-
-## Confidence Indicators
-
-- Overall transcription confidence rating in metadata
-- Per-segment confidence flags for low-quality sections
-- Threshold configuration: below X% confidence, flag segment (default: 80%)
-- Option to include/exclude low-confidence segments
+The summary pipeline supports Ollama, Claude, and OpenAI providers. Automatic
+selection is local-first and uses Ollama before configured cloud providers unless
+`llm_priority` overrides the order.
 
 ## Configuration
 
-Priority order (highest to lowest):
-1. CLI flags
-2. Config file (.transcribe.yaml in current directory or home)
-3. Environment variables
-4. Sensible defaults
+Configuration is resolved from command-line options, project and user YAML files,
+environment variables, command-backed secrets, and compiled defaults. Secrets may
+be supplied through environment variables or secret-manager commands rather than
+stored directly in YAML.
 
-### CLI Flags (minimum)
-```
---output, -o       Output path (default: input basename + .md)
---speakers, -s     Path to speaker names file or comma-separated list
---timestamps, -t   Include timestamps (default: true)
---confidence, -c   Minimum confidence threshold (default: 0.8)
---model, -m        Whisper model size (default: base)
---verbose, -v      Logging verbosity
---dry-run          Show what would be done without processing
-```
+## Accessibility and interoperability
 
-## Dependencies
+The current interface is command-line based and scriptable. Output formats are
+chosen so transcripts can be read directly, edited in common document tools, used
+as subtitles, or processed as structured data.
 
-- Transcription: whisper.cpp (preferred for Apple Silicon) or openai-whisper
-- Diarization: pyannote-audio or equivalent
-- Audio processing: ffmpeg
-- LLM for summarization: Claude API or local model
+## Success criteria
 
-## Roadmap (not for v1)
+- The root help makes every output command discoverable.
+- Command-specific help describes output location and relevant options.
+- Clear recordings produce readable transcripts with useful timing information.
+- Timestamped JSON is valid JSON and exposes token offsets and formatted times.
+- Optional dependency failures do not misrepresent the output that was produced.
+- Installation through Homebrew or Make preserves the same CLI behaviour.
 
-- Real-time transcription
-- GUI interface
-- Multi-file batch processing (though should be trivially scriptable)
-- Translation (transcribe in source language only)
+## Changelog
 
-## Success Criteria
-
-- Processes a 1-hour meeting recording in under 10 minutes on M-series Mac
-- Produces accurate, readable summary without manual editing for clear audio
-- Fails fast and informatively for problematic inputs
+- 2.0: Replaced the original summary-only vision with the current subcommand product and output contracts.

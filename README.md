@@ -1,21 +1,21 @@
 # Transcribe
 
-Turn audio and video recordings into structured documents, subtitles, and timestamped transcripts — all locally.
+Turn audio and video recordings into structured documents, subtitles, and timestamped transcripts --- all locally.
 
 **What it does:** You give it an audio file from a meeting, interview, or conversation. Depending on the subcommand, it gives you back:
-- **summarize** — A readable document with summary, action items, full transcript, and speaker attribution
-- **text** — Plain text or markdown transcript (no LLM required)
-- **srt** — SRT subtitle files (with optional speaker labels)
-- **vtt** — WebVTT subtitle files (with optional voice spans)
-- **words** — Word-by-word JSON with per-word timestamps
+- **summarize** --- A readable document with summary, action items, full transcript, and speaker attribution
+- **text** --- Plain text or markdown transcript (no LLM required)
+- **srt** --- SRT subtitle files (with optional speaker labels)
+- **vtt** --- WebVTT subtitle files (with optional voice spans)
+- **words** --- Full whisper.cpp JSON with token-level timestamps
 
-**How it works:** Everything runs locally on your Mac — your audio never leaves your computer.* The tool uses AI to transcribe speech (via whisper.cpp), identify different speakers (via speechbrain with Metal GPU acceleration on Apple Silicon), and summarize the conversation (via Ollama).
+**How it works:** Everything runs locally on your Mac --- your audio never leaves your computer.* The tool uses AI to transcribe speech (via whisper.cpp), identify different speakers (via speechbrain with Metal GPU acceleration on Apple Silicon), and summarize the conversation (via Ollama).
 
 **No accounts needed:** Works out of the box without any API keys or signups. Just install and run.
 
 <sub>* If you optionally configure Claude or OpenAI API keys for summarization, your transcript text (not audio) will be sent to those services.</sub>
 
-*macOS only — requires Apple Silicon or Intel Mac.*
+*macOS only --- requires Apple Silicon or Intel Mac.*
 
 # Rationale
 Dozens of commercial apps offer meeting transcription and summarization, for a tidy fee, despite being built on open-source technologies. This project makes that capability freely available, with no accounts or subscriptions required.
@@ -50,8 +50,8 @@ transcribe srt meeting.m4a
 # Generate WebVTT subtitles
 transcribe vtt meeting.m4a
 
-# Generate word-by-word JSON with timestamps
-transcribe words meeting.m4a
+# Generate timestamped JSON
+transcribe words meeting.m4a --output meeting.json
 ```
 
 All subcommands support speaker diarization:
@@ -132,7 +132,7 @@ export OLLAMA_MODEL="llama3.2:3b"
 
 ## Features
 
-- **Multiple output formats:** Markdown summaries, plain text/markdown transcripts, SRT subtitles, WebVTT subtitles, word-level JSON, plus docx/odt/pdf/html via pandoc
+- **Multiple output formats:** Markdown summaries, plain text/markdown transcripts, SRT subtitles, WebVTT subtitles, token-level JSON, plus docx/odt/pdf/html via pandoc
 - Transcribe audio from any media file (m4a, mp4, wav, mp3, opus, webm)
 - Speaker diarization (who spoke when) with GPU acceleration via Metal on Apple Silicon
 - LLM-powered meeting summaries with action items
@@ -151,7 +151,7 @@ ollama pull llama3.1:8b
 ### Build and Install
 
 ```bash
-git clone https://github.com/tigger04/transcribe-summarize.git
+git clone https://github.com/tigger-developer/transcribe-summarize.git
 cd transcribe-summarize
 make install
 ```
@@ -169,7 +169,7 @@ transcribe text meeting.m4a --format md       # Markdown transcript
 transcribe text meeting.m4a -o notes.docx     # Docx via pandoc (format deduced)
 transcribe srt meeting.m4a                    # SRT subtitles
 transcribe vtt meeting.m4a                    # WebVTT subtitles
-transcribe words meeting.m4a                  # Word-by-word JSON
+transcribe words meeting.m4a -o meeting.json  # JSON with token timestamps
 
 # With speaker labels
 transcribe srt --speakers "Alice,Bob" meeting.m4a
@@ -192,7 +192,7 @@ transcribe summarize meeting.m4a --dry-run
 | `-o, --output` | Output path | `<input>.<ext>` |
 | `-s, --speakers` | Speaker names (comma-separated or file) | Auto-detect |
 | `-m, --model` | Whisper model name (see below) | `small` |
-| `--preprocess` | Audio preprocessing (auto/none/analyze) | `auto` |
+| `--preprocess` | Audio preprocessing (auto/none/analyse) | `auto` |
 | `--device` | Compute device for diarization (auto/cpu/mps/cuda) | `auto` |
 | `-v` | Verbosity (-v, -vv, -vvv) | quiet |
 
@@ -224,6 +224,44 @@ model: large-v3-turbo
 | `--timestamps` / `--no-timestamps` | Include timestamps | `false` |
 
 Format is resolved in priority order: explicit `--format` flag > output file extension (from `-o`) > default (`txt`). Formats docx, odt, pdf, and html require [pandoc](https://pandoc.org/) (`brew install pandoc`). PDF also requires a LaTeX engine (`brew install --cask basictex`).
+
+### Timestamped JSON (`words` only)
+
+The `words` subcommand writes full whisper.cpp JSON to a file. It does not write
+the JSON payload to standard output, so shell redirection must not be used to name
+the JSON file.
+
+```bash
+transcribe words meeting.m4a --output meeting.json
+```
+
+Without `--output`, the default path is `meeting.json` beside the input file.
+Per-token timing data is stored under
+`transcription[].tokens[].timestamps`, with numeric millisecond values under
+`transcription[].tokens[].offsets`. Whisper tokens may be complete words,
+punctuation, or word fragments.
+
+Example token:
+
+```json
+{
+  "text": " meeting",
+  "timestamps": {
+    "from": "00:00:01,220",
+    "to": "00:00:01,640"
+  },
+  "offsets": {
+    "from": 1220,
+    "to": 1640
+  }
+}
+```
+
+Validate an output file with:
+
+```bash
+jq empty meeting.json
+```
 
 ### Subtitle Flags (srt and vtt only)
 
@@ -412,4 +450,4 @@ After release, update your Homebrew tap with the new formula.
 
 ## License
 
-MIT — Copyright Tadhg Paul
+MIT. Copyright Tadhg Paul.

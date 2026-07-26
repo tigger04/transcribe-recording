@@ -31,6 +31,12 @@ playground.xcworkspace
 
 .build/
 
+# Agent runtime state
+.agent/
+.agents/
+.claude/
+.codex/
+
 # CocoaPods
 #
 # We recommend against adding the Pods directory to your .gitignore. However

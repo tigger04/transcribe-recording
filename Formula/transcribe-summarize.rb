@@ -18,6 +18,7 @@ class TranscribeSummarize < Formula
     bin.install ".build/release/transcribe"
     bin.install_symlink "transcribe" => "transcribe-summarize"
     pkgshare.install "scripts/diarize.py"
+    pkgshare.install "docs/transcribe-help.md"
   end
 
   def post_install

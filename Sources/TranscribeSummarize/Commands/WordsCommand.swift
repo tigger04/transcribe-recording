@@ -7,7 +7,7 @@ import Foundation
 struct WordsCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "words",
-        abstract: "Generate word-by-word JSON with per-word timestamps."
+        abstract: HelpText.text(.wordsAbstract)
     )
 
     @OptionGroup var common: CommonOptions

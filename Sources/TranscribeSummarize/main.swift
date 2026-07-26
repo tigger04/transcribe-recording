@@ -8,19 +8,8 @@ import Foundation
 struct Transcribe: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "transcribe",
-        abstract: "Transcribe audio and video files.",
-        discussion: """
-            Subcommands:
-              summarize  - Full pipeline: transcribe, diarize, LLM summary → markdown
-              text       - Generate plain text or markdown transcript (no LLM)
-              srt        - Generate SRT subtitles
-              vtt        - Generate WebVTT subtitles
-              words      - Generate word-by-word JSON with timestamps
-
-            Config file: ~/.config/transcribe-summarize/config.yaml
-
-            All subcommands support --speakers for speaker diarization.
-            """,
+        abstract: HelpText.text(.rootAbstract),
+        discussion: HelpText.text(.rootDiscussion),
         version: "0.2.21",
         subcommands: [SummarizeCommand.self, TextCommand.self, SRTCommand.self, VTTCommand.self, WordsCommand.self]
     )
@@ -33,14 +22,7 @@ struct Transcribe: AsyncParsableCommand {
 
         if invocationName == "transcribe-summarize" {
             fputs("Warning: 'transcribe-summarize' is deprecated. Use 'transcribe summarize' instead.\n", stderr)
-
-            var args = Array(CommandLine.arguments.dropFirst())
-
-            // Only inject "summarize" if user didn't already specify a known subcommand
-            let knownSubcommands: Set<String> = ["summarize", "text", "srt", "vtt", "words", "help"]
-            if args.isEmpty || !knownSubcommands.contains(args[0]) {
-                args.insert("summarize", at: 0)
-            }
+            let args = legacyArguments(Array(CommandLine.arguments.dropFirst()))
 
             do {
                 var command = try parseAsRoot(args)
@@ -64,5 +46,18 @@ struct Transcribe: AsyncParsableCommand {
                 exit(withError: error)
             }
         }
+    }
+
+    static func legacyArguments(_ arguments: [String]) -> [String] {
+        let rootArguments: Set<String> = ["--help", "-h", "--version"]
+        let knownSubcommands: Set<String> = ["summarize", "text", "srt", "vtt", "words", "help"]
+
+        guard let first = arguments.first else {
+            return ["summarize"]
+        }
+        if rootArguments.contains(first) || knownSubcommands.contains(first) {
+            return arguments
+        }
+        return ["summarize"] + arguments
     }
 }
